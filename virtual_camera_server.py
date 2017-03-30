@@ -35,7 +35,7 @@ def get_shot(pos):
 @app.route('/')
 def home():
     global START, END
-    return render_template('index.html', start=START, end=END, caching='false')
+    return render_template('index.html', start=START, end=END, caching='true')
 
 @app.route('/left/<pos>')
 def left(pos):
