@@ -13,6 +13,8 @@ class VirtualCamera:
         self.motor_end = 12
         self.motor_inc = 1
         self.motor_delay = 0.2
+        self.image_width = 600
+        self.image_height: 800
         # initialization
         self.camera = picamera.PiCamera()
         self.camera.vflip = True
@@ -25,32 +27,32 @@ class VirtualCamera:
         self.mount.start(self.pos)
         time.sleep(delay)
         self.mount.stop()
-        
+
     def move_to(self, pos, delay):
         self.pos = pos
         self.move(delay)
-        
+
     def move_left(self, amount=1, delay=0.2):
         self.pos -= amount
         self.move(delay)
-        
+
     def move_right(self, amount=1, delay=0.2):
         self.pos += amount
         self.move(delay)
-        
+
     def get_image(self):
         # stream = StringIO()
 	stream = 'images/img'+str(self.pos)+'.jpg'
-        self.camera.capture(stream, format='jpeg')
+        self.camera.capture(stream, format='jpeg', resize=(self.image_width, self.image_height))
         # stream.seek(0)
         return stream
-    
+
     def get_image_pair(self):
         image_left = self.get_image()
         self.move_right(self.occular_offset, self.motor_delay)
         image_right = self.get_image()
         return [image_left, image_right]
-        
+
     def capture_sweep(self):
         image_pairs = []
         self.camera.start_preview()
@@ -61,7 +63,6 @@ class VirtualCamera:
             i += self.motor_inc
         self.camera.stop_preview()
         return image_pairs
-    
+
     def cleanup(self):
         GPIO.cleanup()
-            
