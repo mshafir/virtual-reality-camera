@@ -38,7 +38,7 @@ class VirtualCamera:
         
     def get_image(self):
         stream = StringIO()
-        camera.capture(stream, format='jpeg')
+        self.camera.capture(stream, format='jpeg')
         stream.seek(0)
         return stream
     
