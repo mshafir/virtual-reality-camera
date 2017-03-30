@@ -29,7 +29,7 @@ def get_shot(pos):
 def home():
     return render_template('index.html')
 
-@app.route('/left/<pos>', methods=['GET'])
+@app.route('/left/<pos>')
 def left(pos):
     global PI
     if PI:
@@ -37,7 +37,7 @@ def left(pos):
     else:
         return flask.send_file('images/left.jpg', mimetype='image/jpeg')
 
-@app.route('/right/<pos>', methods=['GET'])
+@app.route('/right/<pos>')
 def right(pos):
     if PI:
         return flask.send_file(get_shot(pos)[1], mimetype='image/jpeg')
