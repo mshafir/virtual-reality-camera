@@ -58,18 +58,26 @@
         var START_ANGLE = 90;
         var END_ANGLE = 270;
         var degtorad = Math.PI / 180;
-        var lastCalledMSecond = 0;
-        var freqLimit = 200;
-        var request = null;
+        var IMAGE_CACHE;
+
+        function cachePano() {
+          var image_pairs = Array(END);
+          var collectFunc = function(position) {
+            return function(leftImageData, rightImageData) {
+              image_pairs[position] = [base64Encode(leftImageData[0]), base64Encode(rightImageData[0])];
+            };
+          }
+          for (var i=START;i<END;i++) {
+            $.when(getImage('left', i), getImage('right', i)).done(collectFunc(i));
+          }
+          return image_pairs;
+        }
 
         $(document).ready(function() {
+            IMAGE_CACHE = cachePano();
             if (window.DeviceOrientationEvent) {
                 window.addEventListener("deviceorientation", function(e) {
-                  // var currentMSecond = Date.now();
-                  // if (currentMSecond > lastCalledMSecond + freqLimit) {
-                    renderImage(compassHeading(e.alpha, e.beta, e.gamma));
-                    lastCalledMSecond = currentMSecond;
-                  // }
+                  renderImage(compassHeading(e.alpha, e.beta, e.gamma));
                 });
             }
         });
@@ -119,20 +127,10 @@
           }
           if (pos !== prevPos) {
             $('#status').text("CompassHeading: "+parseInt(compassHeading)+", Position: "+pos);
-            if (request != null && request.abort) {
-	      try {
-              	request.abort();
-	      } catch(err) {
-	      }
+            if (IMAGE_CACHE[pos]) {
+              $("#left-image").css('background-image', 'url(data:image/jpeg;base64,'+IMAGE_CACHE[pos][0]+')');
+              $("#right-image").css('background-image', 'url(data:image/jpeg;base64,'+IMAGE_CACHE[pos][1]+')');
             }
-            request = $.when(getImage('left', pos), getImage('right', pos));
-            request.done(function(leftImageData, rightImageData) {
-              //$("#left-image").attr('src', 'data:image/jpeg;base64,' + base64Encode(leftImageData[0]));
-              //$("#right-image").attr('src', 'data:image/jpeg;base64,' + base64Encode(rightImageData[0]));
-              $("#left-image").css('background-image', 'url(data:image/jpeg;base64,'+base64Encode(leftImageData[0])+')')
-              $("#right-image").css('background-image', 'url(data:image/jpeg;base64,'+base64Encode(rightImageData[0])+')')
-              request = null;
-            });
             prevPos = pos;
           }
         }
