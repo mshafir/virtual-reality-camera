@@ -65,11 +65,11 @@
         $(document).ready(function() {
             if (window.DeviceOrientationEvent) {
                 window.addEventListener("deviceorientation", function(e) {
-                  var currentMSecond = Date.now();
-                  if (currentMSecond > lastCalledMSecond + freqLimit) {
+                  // var currentMSecond = Date.now();
+                  // if (currentMSecond > lastCalledMSecond + freqLimit) {
                     renderImage(compassHeading(e.alpha, e.beta, e.gamma));
                     lastCalledMSecond = currentMSecond;
-                  }
+                  // }
                 });
             }
         });
@@ -119,8 +119,11 @@
           }
           if (pos !== prevPos) {
             $('#status').text("CompassHeading: "+parseInt(compassHeading)+", Position: "+pos);
-            if (request) {
-              request.abort();
+            if (request != null && request.abort) {
+	      try {
+              	request.abort();
+	      } catch(err) {
+	      }
             }
             request = $.when(getImage('left', pos), getImage('right', pos));
             request.done(function(leftImageData, rightImageData) {
