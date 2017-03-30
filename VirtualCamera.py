@@ -13,10 +13,11 @@ class VirtualCamera:
         self.motor_end = 12
         self.motor_inc = 1
         self.motor_delay = 0.2
-        self.image_width = 600
-        self.image_height: 800
+        self.image_width = 800
+        self.image_height = 600
         # initialization
         self.camera = picamera.PiCamera()
+        self.camera.resolution = (self.image_width, self.image_height)
         self.camera.vflip = True
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.motor_pin, GPIO.OUT)
@@ -43,7 +44,7 @@ class VirtualCamera:
     def get_image(self):
         # stream = StringIO()
 	stream = 'images/img'+str(self.pos)+'.jpg'
-        self.camera.capture(stream, format='jpeg', resize=(self.image_width, self.image_height))
+        self.camera.capture(stream, format='jpeg', resize=(self.image_width / 2, self.image_height / 2))
         # stream.seek(0)
         return stream
 
