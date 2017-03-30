@@ -66,8 +66,8 @@ INIT_POS = 3
 MOTOR_PIN = 18
 START = 3
 END = 12
-#camera = VirtualCamera(MOTOR_PIN, INIT_POS)
-#sweep = camera.capture_sweep(START, END)
+camera = VirtualCamera(MOTOR_PIN, INIT_POS)
+sweep = camera.capture_sweep(START, END)
       
 app = Flask(__name__)
 
