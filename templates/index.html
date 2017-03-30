@@ -36,7 +36,7 @@
         position: relative;
       }
       img {
-        width: 100%;
+        width: 150%;
       }
       body {
         margin: 0;
@@ -97,7 +97,7 @@
                url: "/"+side+"/"+position,
                type: "GET",
                mimeType: "text/plain; charset=x-user-defined",
-               cache: false
+               cache: {{ caching }}
            });
         }
 

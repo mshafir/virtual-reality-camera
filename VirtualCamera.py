@@ -2,6 +2,7 @@ import RPi.GPIO as GPIO
 import picamera
 from PIL import Image
 from StringIO import StringIO
+import time
 
 class VirtualCamera:
     def __init__(self):
@@ -17,7 +18,7 @@ class VirtualCamera:
         self.camera.vflip = True
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.motor_pin, GPIO.OUT)
-        self.move_to(self.motor_start)
+        self.move_to(self.motor_start, 0.5)
 
     def move(self, delay=0.2):
         self.mount = GPIO.PWM(self.motor_pin, 50)
@@ -38,9 +39,10 @@ class VirtualCamera:
         self.move(delay)
         
     def get_image(self):
-        stream = StringIO()
+        # stream = StringIO()
+	stream = 'images/img'+str(self.pos)+'.jpg'
         self.camera.capture(stream, format='jpeg')
-        stream.seek(0)
+        # stream.seek(0)
         return stream
     
     def get_image_pair(self):

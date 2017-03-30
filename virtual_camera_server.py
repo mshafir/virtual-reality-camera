@@ -35,14 +35,15 @@ def get_shot(pos):
 @app.route('/')
 def home():
     global START, END
-    return render_template('index.html', start=START, end=END)
+    return render_template('index.html', start=START, end=END, caching='true')
 
 @app.route('/left/<pos>')
 def left(pos):
     global PI
     pos = int(pos)
     if PI:
-        return flask.send_file(get_shot(pos)[0], mimetype='image/jpeg')
+	shot = get_shot(pos)[0]
+        return flask.send_file(shot, mimetype='image/jpeg')
     else:
         return flask.send_file('images/img'+str(19-pos)+'.jpg', mimetype='image/jpeg')
 
@@ -51,7 +52,8 @@ def right(pos):
     global PI
     pos = int(pos)
     if PI:
-        return flask.send_file(get_shot(pos)[1], mimetype='image/jpeg')
+	shot = get_shot(pos)[1]
+        return flask.send_file(shot, mimetype='image/jpeg')
     else:
         return flask.send_file('images/img'+str(20-pos)+'.jpg', mimetype='image/jpeg')
 
