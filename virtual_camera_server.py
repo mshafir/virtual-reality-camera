@@ -54,7 +54,7 @@ class VirtualCamera:
         for i in range(start, end):
             self.move_to(i)
             image_pairs.append(self.get_image_pair())
-        self.camera.stop_recording()
+        self.camera.stop_preview()
         return image_pairs
     
     def cleanup(self):
