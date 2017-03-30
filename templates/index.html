@@ -60,6 +60,7 @@
         var degtorad = Math.PI / 180;
         var lastCalledMSecond = 0;
         var freqLimit = 200;
+        var request = null;
 
         $(document).ready(function() {
             if (window.DeviceOrientationEvent) {
@@ -118,11 +119,16 @@
           }
           if (pos !== prevPos) {
             $('#status').text("CompassHeading: "+parseInt(compassHeading)+", Position: "+pos);
-            $.when(getImage('left', pos), getImage('right', pos)).done(function(leftImageData, rightImageData) {
+            if (request) {
+              request.abort();
+            }
+            request = $.when(getImage('left', pos), getImage('right', pos));
+            request.done(function(leftImageData, rightImageData) {
               //$("#left-image").attr('src', 'data:image/jpeg;base64,' + base64Encode(leftImageData[0]));
               //$("#right-image").attr('src', 'data:image/jpeg;base64,' + base64Encode(rightImageData[0]));
               $("#left-image").css('background-image', 'url(data:image/jpeg;base64,'+base64Encode(leftImageData[0])+')')
               $("#right-image").css('background-image', 'url(data:image/jpeg;base64,'+base64Encode(rightImageData[0])+')')
+              request = null;
             });
             prevPos = pos;
           }
