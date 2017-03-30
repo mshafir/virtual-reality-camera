@@ -18,7 +18,7 @@ app = Flask(__name__)
 
 if PI:
     START = camera.motor_start
-    END = camera.motor_end
+    END = int(camera.motor_end / camera.motor_inc)
 else:
     START = 1
     END = 18
@@ -30,12 +30,12 @@ def get_shot(pos):
         pos = START
     if pos > END:
         pos = END
-    return sweep[pos]
+    return sweep[END-pos+START]
 
 @app.route('/')
 def home():
     global START, END
-    return render_template('index.html', start=START, end=END, caching='true')
+    return render_template('index.html', start=START, end=END, caching='false')
 
 @app.route('/left/<pos>')
 def left(pos):

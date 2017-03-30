@@ -8,13 +8,14 @@ class VirtualCamera:
     def __init__(self):
         # VIRTUAL CAMERA SETTINGS
         self.motor_pin = 18
-        self.occular_offset = 0.3
-        self.motor_start = 3
+        self.occular_offset = 0.2
+        self.motor_start = 5
         self.motor_end = 12
-        self.motor_inc = 1
-        self.motor_delay = 0.2
+        self.motor_inc = 0.2
+        self.motor_delay = 0.02
         self.image_width = 800
         self.image_height = 600
+	self.image_scaling = 0.75
         # initialization
         self.camera = picamera.PiCamera()
         self.camera.resolution = (self.image_width, self.image_height)
@@ -44,7 +45,7 @@ class VirtualCamera:
     def get_image(self):
         # stream = StringIO()
 	stream = 'images/img'+str(self.pos)+'.jpg'
-        self.camera.capture(stream, format='jpeg', resize=(self.image_width / 2, self.image_height / 2))
+        self.camera.capture(stream, format='jpeg', resize=(int(self.image_width * self.image_scaling), int(self.image_height * self.image_scaling)))
         # stream.seek(0)
         return stream
 
