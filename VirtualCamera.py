@@ -8,11 +8,11 @@ class VirtualCamera:
     def __init__(self):
         # VIRTUAL CAMERA SETTINGS
         self.motor_pin = 18
-        self.occular_offset = 0.2
+        self.occular_offset = 0.1
         self.motor_start = 5
         self.motor_end = 12
         self.motor_inc = 0.2
-        self.motor_delay = 0.02
+        self.motor_delay = 0.005
         self.image_width = 800
         self.image_height = 600
 	self.image_scaling = 0.75
