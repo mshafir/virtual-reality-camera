@@ -18,6 +18,17 @@
         top: 0;
         bottom: 0;
       }
+      #alpha {
+        width: 100%;
+        background-color: white;
+        top: 0;
+        padding: 3rem;
+        font-size: 16px;
+        position: absolute;
+        z-index: 10;
+        left: 0;
+        text-align: center;
+      }
       .container {
         width: 100%;
         height: 100%;
@@ -37,19 +48,24 @@
     <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
     <script>
         var prevPos = 0;
+        var START = 3;
+        var END = 12;
+        var START_ANGLE = 90;
+        var END_ANGLE = 270;
 
         $(document).ready(function() {
             if (window.DeviceOrientationEvent) {
-                window.addEventListener("deviceorientation", renderImage, true);
+                window.addEventListener("deviceorientation", function(e) { renderImage(e.alpha); });
             }
         });
 
         function renderImage(alpha, beta, gamma) {
           var pos = translateAlpha(alpha);
           if (!pos) {
-            pos = 3;
+            pos = START;
           }
           if (pos !== prevPos) {
+            $('#alpha').text("Position: "+pos);
             $.ajax({
                  url: "/left/"+pos,
                  type: "GET",
@@ -97,20 +113,20 @@
         }
 
         function translateAlpha(alpha) {
-          var start = 3;
-          var end = 12;
-          if (alpha < 0) {
-            return start;
-          } else if (alpha > 180) {
-            return end;
+          var diffAngle = END_ANGLE - START_ANGLE;
+          if (alpha < START_ANGLE) {
+            return START;
+          } else if (alpha > END_ANGLE) {
+            return END;
           } else {
-            var segment = 180 / (end - start);
-            return parseInt(alpha / segment) + start;
+            var segment = diffAngle / (END - START);
+            return parseInt((alpha-START_ANGLE) / segment) + START;
           }
         }
     </script>
 
     <div class="container">
+      <div id="alpha"></div>
       <div class="left-side">
         <img id="left-image" />
       </div>

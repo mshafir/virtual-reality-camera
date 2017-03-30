@@ -1,10 +1,15 @@
-import RPi.GPIO as GPIO
+import sys
+PI = len(sys.argv) == 1
+
+if PI:
+    import RPi.GPIO as GPIO
+    import picamera
+    from PIL import Image
+    
 import time
-import picamera
 import flask
 from flask import Flask
 from flask import render_template
-from PIL import Image
 from io import BytesIO
 from StringIO import StringIO
 
@@ -17,11 +22,12 @@ class VirtualCamera:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(MOTOR_PIN, GPIO.OUT)
         self.move_to(initial_position)
+        self.occular_offset = 0.3
 
-    def move(self):
+    def move(self, delay=0.2):
         self.mount = GPIO.PWM(self.motor_pin, 50)
         self.mount.start(self.pos)
-        time.sleep(0.2)
+        time.sleep(delay)
         self.mount.stop()
         
     def move_to(self, pos):
@@ -44,7 +50,7 @@ class VirtualCamera:
     
     def get_image_pair(self):
         image_left = self.get_image()
-        self.move_right(0.3)
+        self.move_right(self.occular_offset)
         image_right = self.get_image()
         return [image_left, image_right]
         
@@ -66,34 +72,43 @@ INIT_POS = 3
 MOTOR_PIN = 18
 START = 3
 END = 12
-camera = VirtualCamera(MOTOR_PIN, INIT_POS)
-sweep = camera.capture_sweep(START, END)
+
+if PI:
+    camera = VirtualCamera(MOTOR_PIN, INIT_POS)
+    sweep = camera.capture_sweep(START, END)
       
 app = Flask(__name__)
 
 def get_shot(pos):
-  global sweep, START, END
-  pos = int(pos)
-  if pos < START:
-    pos = START
-  if pos > END:
-    pos = END
-  return sweep[pos]
+    global sweep, START, END
+    pos = int(pos)
+    if pos < START:
+        pos = START
+    if pos > END:
+        pos = END
+    return sweep[pos]
 
 @app.route('/')
 def home():
-  return render_template('index.html')
+    return render_template('index.html')
 
 @app.route('/left/<pos>', methods=['POST', 'GET'])
 def left(pos):
-  return flask.send_file(get_shot(pos)[0], mimetype='image/jpeg')
-  #return flask.send_file('images/IMG_8173.JPG', mimetype='image/jpeg')
+    global PI
+    if PI:
+        return flask.send_file(get_shot(pos)[0], mimetype='image/jpeg')
+    else:
+        return flask.send_file('images/IMG_8173.JPG', mimetype='image/jpeg')
 
 @app.route('/right/<pos>', methods=['POST', 'GET'])
 def right(pos):
-  return flask.send_file(get_shot(pos)[1], mimetype='image/jpeg')
-  #return flask.send_file('images/IMG_8174.JPG', mimetype='image/jpeg')
+    if PI:
+        return flask.send_file(get_shot(pos)[1], mimetype='image/jpeg')
+    else:
+        return flask.send_file('images/IMG_8174.JPG', mimetype='image/jpeg')
 
 
 app.run(host='0.0.0.0')
-camera.cleanup()
+
+if PI:
+    camera.cleanup()
