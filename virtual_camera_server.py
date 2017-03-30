@@ -98,14 +98,14 @@ def left(pos):
     if PI:
         return flask.send_file(get_shot(pos)[0], mimetype='image/jpeg')
     else:
-        return flask.send_file('images/IMG_8173.JPG', mimetype='image/jpeg')
+        return flask.send_file('images/left.jpg', mimetype='image/jpeg')
 
 @app.route('/right/<pos>', methods=['POST', 'GET'])
 def right(pos):
     if PI:
         return flask.send_file(get_shot(pos)[1], mimetype='image/jpeg')
     else:
-        return flask.send_file('images/IMG_8174.JPG', mimetype='image/jpeg')
+        return flask.send_file('images/right.jpg', mimetype='image/jpeg')
 
 
 app.run(host='0.0.0.0')
