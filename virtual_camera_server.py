@@ -1,10 +1,10 @@
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import time
-#import picamera
+import picamera
 import flask
 from flask import Flask
 from flask import render_template
-#from PIL import Image
+from PIL import Image
 from io import BytesIO
 from StringIO import StringIO
 
@@ -16,17 +16,17 @@ class VirtualCamera:
         self.camera.vflip = True
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(MOTOR_PIN, GPIO.OUT)
-        self.move(initial_position)
-        
-    def move(self, pos):
-        self.pos = pos
-        self.move()
+        self.move_to(initial_position)
 
     def move(self):
         self.mount = GPIO.PWM(self.motor_pin, 50)
         self.mount.start(self.pos)
         time.sleep(0.2)
         self.mount.stop()
+        
+    def move_to(self, pos):
+        self.pos = pos
+        self.move()
         
     def move_left(self, amount=1):
         self.pos -= amount
@@ -52,7 +52,7 @@ class VirtualCamera:
         image_pairs = []
         self.camera.start_preview()
         for i in range(start, end):
-            self.move(i)
+            self.move_to(i)
             image_pairs.append(self.get_image_pair())
         self.camera.stop_recording()
         return image_pairs
@@ -86,14 +86,14 @@ def home():
 
 @app.route('/left/<pos>', methods=['POST', 'GET'])
 def left(pos):
-  # return flask.send_file(get_shot(pos)[0], mimetype='image/jpeg')
-  return flask.send_file('images/IMG_8173.JPG', mimetype='image/jpeg')
+  return flask.send_file(get_shot(pos)[0], mimetype='image/jpeg')
+  #return flask.send_file('images/IMG_8173.JPG', mimetype='image/jpeg')
 
 @app.route('/right/<pos>', methods=['POST', 'GET'])
 def right(pos):
-  # return flask.send_file(get_shot(pos)[1], mimetype='image/jpeg')
-  return flask.send_file('images/IMG_8174.JPG', mimetype='image/jpeg')
+  return flask.send_file(get_shot(pos)[1], mimetype='image/jpeg')
+  #return flask.send_file('images/IMG_8174.JPG', mimetype='image/jpeg')
 
 
 app.run(host='0.0.0.0')
-#camera.cleanup()
+camera.cleanup()
