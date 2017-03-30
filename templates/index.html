@@ -58,11 +58,17 @@
         var START_ANGLE = 90;
         var END_ANGLE = 270;
         var degtorad = Math.PI / 180;
+        var lastCalledSecond = 0;
+        var freqLimit = 2;
 
         $(document).ready(function() {
             if (window.DeviceOrientationEvent) {
                 window.addEventListener("deviceorientation", function(e) {
-                  renderImage(compassHeading(e.alpha, e.beta, e.gamma));
+                  var currentSecond = Math.floor(Date.now() / 1000);
+                  if (currentSecond > lastCalledSecond + freqLimit) {
+                    renderImage(compassHeading(e.alpha, e.beta, e.gamma));
+                    lastCalledSecond = currentSecond;
+                  }
                 });
             }
         });
