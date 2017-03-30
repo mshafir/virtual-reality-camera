@@ -8,14 +8,14 @@
         position: absolute;
         left: 0;
         width: 50%;
-        top: 0;
+        top: 100px;
         bottom: 0;
       }
       .right-side {
         position: absolute;
         right: 0;
         width: 50%;
-        top: 0;
+        top: 100px;
         bottom: 0;
       }
       #alpha {
@@ -25,6 +25,7 @@
         padding-top: 1rem;
         padding-bottom: 1rem;
         position: absolute;
+        height: 100px;
         z-index: 10;
         left: 0;
         text-align: center;
@@ -48,16 +49,48 @@
     <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
     <script>
         var prevPos = 0;
-        var START = 3;
-        var END = 12;
+        var START = {{ start }};
+        var END = {{ end }};
         var START_ANGLE = 90;
         var END_ANGLE = 270;
+        var degtorad = Math.PI / 180;
 
         $(document).ready(function() {
             if (window.DeviceOrientationEvent) {
-                window.addEventListener("deviceorientation", function(e) { renderImage(e.alpha); });
+                window.addEventListener("deviceorientation", function(e) {
+                  renderImage(compassHeading(e.alpha, e.beta, e.gamma));
+                });
             }
         });
+
+        function compassHeading( alpha, beta, gamma ) {
+          var _x = beta  ? beta  * degtorad : 0; // beta value
+          var _y = gamma ? gamma * degtorad : 0; // gamma value
+          var _z = alpha ? alpha * degtorad : 0; // alpha value
+
+          var cX = Math.cos( _x );
+          var cY = Math.cos( _y );
+          var cZ = Math.cos( _z );
+          var sX = Math.sin( _x );
+          var sY = Math.sin( _y );
+          var sZ = Math.sin( _z );
+
+          // Calculate Vx and Vy components
+          var Vx = - cZ * sY - sZ * sX * cY;
+          var Vy = - sZ * sY + cZ * sX * cY;
+
+          // Calculate compass heading
+          var compassHeading = Math.atan( Vx / Vy );
+
+          // Convert compass heading to use whole unit circle
+          if( Vy < 0 ) {
+            compassHeading += Math.PI;
+          } else if( Vx < 0 ) {
+            compassHeading += 2 * Math.PI;
+          }
+
+          return 360 - compassHeading * ( 180 / Math.PI ); // Compass Heading (in degrees)
+        }
 
         function getImage(side, position) {
           return $.ajax({
@@ -68,18 +101,16 @@
            });
         }
 
-        function renderImage(alpha, beta, gamma) {
-          var pos = translateAlpha(alpha);
+        function renderImage(compassHeading) {
+          var pos = translateCompassHeading(compassHeading);
           if (!pos) {
             pos = START;
           }
           if (pos !== prevPos) {
-            $('#alpha').text("Position: "+pos);
-            getImage('left', pos).done(function( data, textStatus, jqXHR ) {
-                 $("#left-image").attr('src', 'data:image/jpeg;base64,' + base64Encode(data));
-            });
-            getImage('right', pos).done(function( data, textStatus, jqXHR ) {
-                  $("#right-image").attr('src', 'data:image/jpeg;base64,' + base64Encode(data));
+            $('#status').text("CompassHeading: "+parseInt(compassHeading)+", Position: "+pos);
+            $.when(getImage('left', pos), getImage('right', pos)).done(function(leftImageData, rightImageData) {
+              $("#left-image").attr('src', 'data:image/jpeg;base64,' + base64Encode(leftImageData[0]));
+              $("#right-image").attr('src', 'data:image/jpeg;base64,' + base64Encode(rightImageData[0]));
             });
             prevPos = pos;
           }
@@ -113,21 +144,21 @@
             return out;
         }
 
-        function translateAlpha(alpha) {
+        function translateCompassHeading(val) {
           var diffAngle = END_ANGLE - START_ANGLE;
-          if (alpha < START_ANGLE) {
+          if (val < START_ANGLE) {
             return START;
-          } else if (alpha > END_ANGLE) {
+          } else if (val > END_ANGLE) {
             return END;
           } else {
             var segment = diffAngle / (END - START);
-            return parseInt((alpha-START_ANGLE) / segment) + START;
+            return parseInt((val-START_ANGLE) / segment) + START;
           }
         }
     </script>
 
     <div class="container">
-      <div id="alpha"></div>
+      <div id="status"></div>
       <div class="left-side">
         <img id="left-image" />
       </div>
